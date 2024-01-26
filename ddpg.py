@@ -40,7 +40,7 @@ class DDPG():
         
         # experience buffer
         self.buffer_size = self.batch_size*100
-        self.replay_buffer = ReplayBuffer(self.buffer_size, self.state_size, self.action_size)
+        self.replay_buffer = ReplayBuffer(self.buffer_size, self.observation_size, self.action_size)
         self.action_choice = OURandomProcess(size=self.action_size, theta=0.15)
         # TODO normalize state
         # TODO (optionals) cuda, load save weights,...
