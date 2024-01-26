@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+ 
 def fanin_init(size, fanin=None):
     fanin = fanin or size[0]
     v = 1. / np.sqrt(fanin)
@@ -52,5 +52,5 @@ class Critic(nn.Module):
         x = torch.cat([state, action], dim=1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)  # No activation on the output layer for the critic
+        x = self.fc3(x)  # no activation on the output layer for the critic
         return x
