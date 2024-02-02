@@ -44,9 +44,6 @@ class DDPG():
         self.action_choice = OURandomProcess(size=self.action_size, theta=0.15)
         # TODO normalize state
         # TODO (optionals) cuda, load save weights,...
-    def get_state(observation): # 
-        # TODO giai ptvp 16-20, return state
-        return {'observation': observation, 'pitch_rate': None, 'pitch_angle': None}
     
     def soft_update(tau, target, source):
         for target_param, param in zip(target.parameters(), source.parameters()):
@@ -58,22 +55,20 @@ class DDPG():
         # sample batch
         print(self.replay_buffer.sample(self.batch_size))
         observation, action, reward, next_observation, terminate = self.replay_buffer.sample(self.batch_size)
-        state = self.get_state(observation)
-        next_state = self.get_state(next_observation)
         with torch.no_grad():
-            next_action = self.target_actor(next_state)
-            next_q_values = self.target_critic(next_state, next_action)
+            next_action = self.target_actor(next_observation)
+            next_q_values = self.target_critic(next_observation, next_action)
         target_q_value =  reward + self.discount*next_q_values
         
         # update critic
         self.critic.zero_grad()
-        pred_q_value = self.critic(state, action)
+        pred_q_value = self.critic(observation, action)
         td_loss = F.mse_loss(pred_q_value, target_q_value)
         td_loss.backward()
         self.critic_optimizer.step()
         # update actor
         self.actor.zero_grad()
-        policy_loss = -self.critic(state, self.actor(state)).mean()
+        policy_loss = -self.critic(observation, self.actor(observation)).mean()
         policy_loss.backward()
         self.actor_optimizer.step()
         # soft update target
@@ -96,17 +91,17 @@ class DDPG():
         action = self.actor(state_tensor).squeeze().detach().numpy()
         if self.is_training:
             epsilon_decay = max(self.epsilon, 0)
-            action += epsilon_decay * self.random_process.sample()
+            action += epsilon_decay * self.action_choice.sample()
         action = np.clip(action, -1.0, 1.0) # to range -1 1
         if decay_epsilon:
             self.epsilon -= self.decay_epsilon
-        action += epsilon_decay * self.random_process.sample()
+        action += epsilon_decay * self.action_choice.sample()
         self.last_action = action
         return action
     
     def reset(self, obs):
         self.last_state = obs
-        self.random_process.reset_states()
+        self.action_choice.reset_states()
 #test 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', default=-1, type=int, help='')
