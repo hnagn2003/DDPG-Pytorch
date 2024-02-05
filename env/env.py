@@ -16,6 +16,7 @@ class UAVEnv():
         self.theta = 0
         self.M = 2
         self.h = 5000
+        self.last_observation = self.alpha, self.M, self.h
         #Table 1
         self.g = 9.8 #Gravitational acceleration
         self.S =  0.0409 #Reference Area
@@ -45,9 +46,13 @@ class UAVEnv():
     def is_terminate(self):
         # TODO
         return False
-    def get_state(self, action): # 
+    def get_state(self): # 
+        return {self.a_z, self.alpha, self.q, self.theta, self.M, self.h}
+    def step(self, action):
+        # TODO return new observation based on action, reward, check terminate
+        self.last_observation = self.get_observation()
         k_DC, k_A, k_I, k_g = action
-
+    
         for t in np.arange(0, self.T_end, self.dt):
             # Calculate Autopilot
             e_1 = k_DC - self.a_z  # somehow we gain a_z
@@ -80,8 +85,7 @@ class UAVEnv():
             self.theta = self.theta + theta_dot * self.dt
             self.M = self.M + M_dot * self.dt
             self.h = self.h + h_dot * self.dt
-        return {self.a_z, self.alpha, self.q, self.theta, self.M, self.h}
-    def step(self, action):
-        # TODO return new observation based on action, reward, check terminate
         reward = -self.k_a*((self.a_z-self.a_zc)/self.a_zmax)**2-self.k_delta*0
-        return self.get_state(self.get_observation(), action), self.get_observation(), reward, self.is_terminate()
+        self.observation = self.get_observation()
+        # return self.get_state(self.get_observation(), action), self.get_observation(), reward, self.is_terminate()
+        return self.observation, self.last_observation, reward, self.is_terminate()

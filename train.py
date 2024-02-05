@@ -20,13 +20,13 @@ def train(args, num_iters, agent, env, max_episode_length=None):
     episode = 0
     episode_steps = 0
     episode_reward = 0
-    obervation = None
+    observation = None
     while iter < num_iters:
         #reset env each start of episode
         print("----------------iter ", iter, "------------------------------")
-        if obervation is None:
-            observation = deepcopy(env.reset())
-            agent.reset(observation)
+        # if observation is None:
+        #     observation = deepcopy(env.reset())
+        #     agent.reset(observation)
             
         # first, agent explore in a fixed of steps
         if iter <= args.num_of_explorations:
@@ -36,12 +36,12 @@ def train(args, num_iters, agent, env, max_episode_length=None):
             action = agent.select_action(observation)
         
         #env response
-        next_observation, reward, terminate = env.step(action)
+        observation, next_observation, reward, terminate = env.step(action)
         next_observation = deepcopy(next_observation)
         if max_episode_length and episode_steps >= max_episode_length -1:
             terminate = True
         # TODO store transition
-        agent.replay_buffer.add(obervation, next_observation, action, reward, terminate)        
+        agent.replay_buffer.add(observation, next_observation, action, reward, terminate)        
 
         # agent update policy
         if iter > args.warmup :
@@ -56,7 +56,7 @@ def train(args, num_iters, agent, env, max_episode_length=None):
             # reset
             observation = None
             episode_steps = 0
-            episode_reward = 0.
+            episode_reward = 0
             episode += 1
 num_iters = 10
 agent = DDPG()
