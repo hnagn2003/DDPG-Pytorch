@@ -46,7 +46,7 @@ def train(args, num_iters, agent, env, max_episode_length=None):
         # agent update policy
         if iter > args.warmup :
             agent.update_policy()
-        step += 1
+        iter += 1
         episode_steps += 1
         episode_reward += reward
         agent.replay_buffer.add()

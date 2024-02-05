@@ -87,5 +87,4 @@ class UAVEnv():
             self.h = self.h + h_dot * self.dt
         reward = -self.k_a*((self.a_z-self.a_zc)/self.a_zmax)**2-self.k_delta*0
         self.observation = self.get_observation()
-        # return self.get_state(self.get_observation(), action), self.get_observation(), reward, self.is_terminate()
         return self.observation, self.last_observation, reward, self.is_terminate()
