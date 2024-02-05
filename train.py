@@ -1,6 +1,5 @@
 import argparse
 from env.env import UAVEnv
-import torch
 from copy import deepcopy
 from ddpg import DDPG
 parser = argparse.ArgumentParser()
@@ -24,6 +23,7 @@ def train(args, num_iters, agent, env, max_episode_length=None):
     obervation = None
     while iter < num_iters:
         #reset env each start of episode
+        print("----------------iter ", iter, "------------------------------")
         if obervation is None:
             observation = deepcopy(env.reset())
             agent.reset(observation)
@@ -59,5 +59,6 @@ def train(args, num_iters, agent, env, max_episode_length=None):
             episode_reward = 0.
             episode += 1
 num_iters = 10
+agent = DDPG()
 env = UAVEnv()
-train
+train(parser.parse_args(), num_iters=num_iters, agent=agent, env=env)

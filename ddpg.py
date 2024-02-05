@@ -13,7 +13,7 @@ class DDPG():
         self.batch_size = args.batch_size
         self.observation_size = observation_size
         self.action_size= action_size
-        self.tau = args.tau # soft update factor
+        self.tau = 0.99 # soft update factor
         self.discount = args.discount
         self.reciprocal = 1.0 / args.epsilon
         self.epsilon = 0.9 # prob of exploration rather than exploitation
@@ -45,7 +45,7 @@ class DDPG():
         # TODO normalize state
         # TODO (optionals) cuda, load save weights,...
     
-    def soft_update(tau, target, source):
+    def soft_update(self, tau, target, source):
         for target_param, param in zip(target.parameters(), source.parameters()):
             target_param.data.copy_(
                 target_param.data * (1.0 - tau) + param.data * tau
@@ -53,7 +53,7 @@ class DDPG():
             
     def update_policy(self):
         # sample batch
-        print(self.replay_buffer.sample(self.batch_size))
+        # print(self.replay_buffer.sample(self.batch_size))
         observation, action, reward, next_observation, terminate = self.replay_buffer.sample(self.batch_size)
         with torch.no_grad():
             next_action = self.target_actor(next_observation)
@@ -72,6 +72,8 @@ class DDPG():
         policy_loss.backward()
         self.actor_optimizer.step()
         # soft update target
+        # for target_param, param in zip(self.target_actor.parameters(), self.actor.parameters()):
+        #     print("a: ", target_param.size(), " b: ", param.size())
         self.soft_update(self.tau, self.target_actor, self.actor)
         self.soft_update(self.tau, self.target_critic, self.critic)
         
